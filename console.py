@@ -116,42 +116,43 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
-        try:
-            if not args:
-                raise SyntaxError()
-            
-            args_list = args.split(" ")
-            class_name = args_list[0]
+        args_list = args.split()
 
-            kwargs = {}
-            for i in range(1, len(args_list)):
-                key_value = args_list[i].split("=")
-                if len(key_value) == 2:
-                    key, value = key_value
-                    if value.startswith('"') and value.endswith('"'):
-                        value = value[1:-1].replace("_", " ")
-                    elif '.' in value:
-                        try:
-                            value = float(value)
-                        except ValueError:
-                            continue
-                    else:
-                        try:
-                            value = int(value)
-                        except ValueError:
-                            continue
-                    kwargs[key] = value
-
-            if class_name in HBNBCommand.classes:
-                obj = HBNBCommand.classes[class_name](**kwargs)
-                storage.new(obj)
-                obj.save()
-                print(obj.id)
-            else:
-                print("** class doesn't exist **")
-
-        except SyntaxError:
+        if not args_list:
             print("** class name missing **")
+            return
+        elif args_list[0] not in HBNBCommand.classes:
+            print("** class doesn't exist **")
+            return
+        
+        class_name = args_list[0]
+        new_instance = HBNBCommand.classes[class_name]()
+
+        for attr in args_list[1:]:
+            key_param = attr.partition("=")
+            key_name = key_param[0]
+            key_value = key_param[2]
+            if key_value.startswith('"') and key_value.endswith('"'):
+                key_value = key_value[1:-1]
+                key_value = key_value.replace("_", " ")
+            elif "." in key_value:
+                try:
+                    key_value = float(key_value)
+                except ValueError:
+                    continue
+            else:
+                 try:
+                     key_value = int(key_value)
+                 except ValueError:
+                     continue
+
+            if hasattr(new_instance, key_name):
+                setattr(new_instance, key_name, key_value)
+
+        storage.new(new_instance)
+        storage.save()
+        print(new_instance.id)
+        storage.save()
 
     def help_create(self):
         """ Help information for the create method """
