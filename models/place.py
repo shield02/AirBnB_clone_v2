@@ -24,15 +24,14 @@ class Place(BaseModel, Base):
     latitude = Column(Float)
     longitude = Column(Float)
 
-    if getenv("HBNB_TYPE_STORAGE") == "db":
-        reviews = relationship("Review", backref="place", cascade="delete")
-    else:
-        def reviews(self):
-            review_list = []
-            all_reviews = models.storage.all(Review)
-            for review in all_reviews.values():
-                if review.place_id == self.id:
-                    review_list.append(review)
-            return review_list
+    # For DBStorage
+    reviews = relationship("Review", backref="place", cascade="delete")
+
+    # For FileStorage
+    def get_reviews(self):
+        """
+        Returns the list of Review instances with place_id equals to the current Place.id
+        """
+        return self.reviews.filter(Review.place_id == self.id)
 
     amenity_ids = []
