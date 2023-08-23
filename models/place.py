@@ -59,13 +59,18 @@ class Place(BaseModel, Base):
     amenities = relationship("Amenity", secondary="place_amenity", backref="place_amenities", viewonly=False)
 
     # For FileStorage
+    def amenities(self, amenity):
+        """
+        Add an Amenity instance to the list of amenities associated with the current Place instance.
+        """
+        self.amenity_ids.append(amenity.id)
+
     def amenities(self):
-        """getter attribute returns the list of Amenity instances"""
-        from models.amenity import Amenity
-        amenity_list = []
-        all_amenities = models.storage.all(Amenity)
-        for amenity in all_amenities.values():
-            if amenity.place_id == self.id:
-                amenity_list.append(amenity)
-        return amenity_list
+        """
+        Retrieve a list of Amenity instances associated with the current Place instance.
+        """
+        amenity_objs = []
+        for a_id in self.amenity_ids:
+            amenity_objs.append(models.storage.get("Amenity", str(a_id)))
+        return amenity_objs
 
