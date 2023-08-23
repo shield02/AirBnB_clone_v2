@@ -11,8 +11,7 @@ from sqlalchemy.orm import relationship
 
 
 class Place(BaseModel, Base):
-    """A place to stay"""
-
+    """ A place to stay """
     __tablename__ = "places"
     city_id = Column(String(60), ForeignKey("cities.id"), nullable=False)
     user_id = Column(String(60), ForeignKey("users.id"), nullable=False)
@@ -34,24 +33,5 @@ class Place(BaseModel, Base):
         Returns the list of Review instances with place_id equals to the current Place.id
         """
         return self.reviews.filter(Review.place_id == self.id)
-    
-    def get_amenities(self):
-        """
-        Returns the list of Amenity instances based on the attribute amenity_ids that contains 
-        all Amenity.id linked to the Place
-        """
-        return [
-            models.Amenity.query.get(amenity_id)
-            for amenity_id in self.amenity_ids
-        ]
 
-    def amenities_set(self, amenities):
-        """
-        Handle append method for adding an Amenity.id to the attribute amenity_ids. This method 
-        should accept only Amenity object.
-        """
-        if not isinstance(amenities, list):
-            return
-        self.amenity_ids.extend([amenity.id for amenity in amenities])
-
-    place_amenities = relationship("Amenity", secondary="place_amenity", viewonly=False)
+    amenity_ids = []
