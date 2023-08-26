@@ -11,10 +11,10 @@ class FileStorage:
     def all(self, cls=None):
         """Returns a dictionary of models currently in storage"""
         if cls is None:
-            return FileStorage.__objects
+            return self.__objects
         else:
             filtered_objects = {}
-            for key, value in FileStorage.__objects.items():
+            for key, value in self.__objects.items():
                 if value.__class__ == cls:
                     filtered_objects[key] = value
             return filtered_objects
@@ -33,11 +33,9 @@ class FileStorage:
             json.dump(temp, f)
 
     def delete(self, obj):
-        if obj is not None:
-            key = obj.__class__.__name__ + '.' + obj.id
-            if key in FileStorage.__objects:
-                del FileStorage.__objects[key]
-                self.save() 
+        """delete obj from __objects if it is inside"""
+        if (obj):
+            self.__objects.pop("{}.{}".format(type(obj).__name__, obj.id))
 
     def reload(self):
         """Loads storage dictionary from file"""
