@@ -11,6 +11,7 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+import models
 
 
 class HBNBCommand(cmd.Cmd):
@@ -116,73 +117,82 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
-        # try:
-        #     if not args:
-        #         raise SyntaxError()
-        #     my_list = args.split(" ")
-
-        #     kwargs = {}
-        #     for i in range(1, len(my_list)):
-        #         key, value = tuple(my_list[i].split("="))
-        #         if value[0] == '"':
-        #             value = value.strip('"').replace("_", " ")
-        #         else:
-        #             try:
-        #                 value = eval(value)
-        #             except (SyntaxError, NameError):
-        #                 continue
-        #         kwargs[key] = value
-
-        #     if kwargs == {}:
-        #         obj = eval(my_list[0])()
-        #     else:
-        #         obj = eval(my_list[0])(**kwargs)
-        #         storage.new(obj)
-        #     print(obj.id)
-        #     obj.save()
-
-        # except SyntaxError:
-        #     print("** class name missing **")
-        # except NameError:
-        #     print("** class doesn't exist **")
-
-        args_list = args.split()
-
-        if not args_list:
-            print("** class name missing **")
-            return
-        elif args_list[0] not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-        
-        class_name = args_list[0]
-        new_instance = HBNBCommand.classes[class_name]()
-
-        for attr in args_list[1:]:
-            key_param = attr.partition("=")
-            key_name = key_param[0]
-            key_value = key_param[2]
-            if key_value.startswith('"') and key_value.endswith('"'):
-                key_value = key_value[1:-1]
-                key_value = key_value.replace("_", " ")
-            elif "." in key_value:
+        if args:
+            try:
+                args = args.split()
+                template = models.dummy_classes[args[0]]
+                new_instance = template()
                 try:
-                    key_value = float(key_value)
-                except ValueError:
-                    continue
-            else:
-                 try:
-                     key_value = int(key_value)
-                 except ValueError:
-                     continue
+                    for pair in args[1:]:
+                        pair_split = pair.split("=")
+                        if (hasattr(new_instance, pair_split[0])):
+                            value = pair_split[1]
+                            flag = 0
+                            if (value.startswith('"')):
+                                value = value.strip('"')
+                                value = value.replace("\\", "")
+                                value = value.replace("_", " ")
+                            elif ("." in value):
+                                try:
+                                    value = float(value)
+                                except:
+                                    flag = 1
+                            else:
+                                try:
+                                    value = int(value)
+                                except:
+                                    flag = 1
+                            if (not flag):
+                                setattr(new_instance, pair_split[0], value)
+                        else:
+                            continue
+                    new_instance.save()
+                    print(new_instance.id)
+                except:
+                    new_instance.rollback()
+            except:
+                print("** class doesn't exist **")
+                models.storage.rollback()
+        else:
+            print("** class name missing **")
 
-            if hasattr(new_instance, key_name):
-                setattr(new_instance, key_name, key_value)
+        # args_list = args.split()
 
-        storage.new(new_instance)
-        storage.save()
-        print(new_instance.id)
-        storage.save()
+        # if not args_list:
+        #     print("** class name missing **")
+        #     return
+        # elif args_list[0] not in HBNBCommand.classes:
+        #     print("** class doesn't exist **")
+        #     return
+        
+        # class_name = args_list[0]
+        # new_instance = HBNBCommand.classes[class_name]()
+
+        # for attr in args_list[1:]:
+        #     key_param = attr.partition("=")
+        #     key_name = key_param[0]
+        #     key_value = key_param[2]
+        #     if key_value.startswith('"') and key_value.endswith('"'):
+        #         key_value = key_value[1:-1]
+        #         key_value = key_value.replace("_", " ")
+        #     elif "." in key_value:
+        #         try:
+        #             key_value = float(key_value)
+        #         except ValueError:
+        #             continue
+        #     else:
+        #          try:
+        #              key_value = int(key_value)
+        #          except ValueError:
+        #              continue
+
+        #     if hasattr(new_instance, key_name):
+        #         setattr(new_instance, key_name, key_value)
+
+        # storage.new(new_instance)
+        # storage.save()
+        # print(new_instance.id)
+        # storage.save()
 
     def help_create(self):
         """ Help information for the create method """
