@@ -15,9 +15,20 @@ from fabric.tasks import execute
 from datetime import datetime
 import os
 
-env.hosts = ['44.211.26.34', '44.192.114.202']
+env.hosts = ['35.153.16.3', '54.160.79.86']
 env.user = "ubuntu"
 env.key_filename = '~/.ssh/id_rsa.pub'
+
+def do_pack():
+    """ generate archived tgz file from the content of web_static """
+    try:
+        my_time = datetime.now().strftime('%Y%m%d%H%M%S')
+        local("mkdir -p versions")
+        my_file = 'versions/web_static_' + my_time + '.tgz'
+        local('tar -vzcf {} web_static'.format(my_file))
+        return (my_file)
+    except Exception:
+        return None
 
 def do_deploy(archive_path):
     """ distrubte an archive to my web servers """
