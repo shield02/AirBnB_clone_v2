@@ -33,8 +33,7 @@ def do_pack():
 
 
 def do_deploy(archive_path):
-    """ distribute an archive to web servers
-    """
+    """ distribute an archive to web servers """
     path_existence = os.path.exists(archive_path)
     if path_existence is False:
         return False
