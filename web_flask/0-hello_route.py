@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Flask framework"""
+"""start a flask application on default parameters"""
 from flask import Flask
 
 app = Flask(__name__)
